@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis Inventario Ecommerce — Arco Norte & GDL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0d1117;overflow:hidden;height:100vh;width:100vw;font-family:'DM Sans',sans-serif;color:#e6edf3}
+.deck{width:100vw;height:100vh;position:relative}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(0.97);transition:opacity .5s ease,transform .5s ease;pointer-events:none;overflow:hidden}
+.slide.active{opacity:1;transform:scale(1);pointer-events:all}
+.content{position:relative;z-index:2;width:100%;max-width:1220px;padding:clamp(.9rem,2.2vw,2.2rem)}
+.nav{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:100;background:rgba(255,255,255,.05);backdrop-filter:blur(14px);padding:6px 18px;border-radius:40px;border:1px solid rgba(255,255,255,.08)}
+.nbtn{width:32px;height:32px;border:none;background:rgba(249,115,22,.15);color:#f97316;border-radius:50%;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.nbtn:hover{background:rgba(249,115,22,.3)}
+.dots{display:flex;gap:5px}.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);cursor:pointer;transition:all .2s}.dot.on{background:#f97316;transform:scale(1.45)}
+.ctr{font-size:.7rem;color:#484f58;min-width:32px;text-align:center}
+.rv{opacity:0;transform:translateY(14px)}
+.blob{position:absolute;border-radius:50%;filter:blur(65px)}
+@keyframes fl{0%,100%{transform:translate(0,0)}50%{transform:translate(28px,-28px)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes gp{0%,100%{text-shadow:0 0 16px rgba(249,115,22,.5)}50%{text-shadow:0 0 26px rgba(249,115,22,.9),0 0 48px rgba(249,115,22,.3)}}
+.gp{animation:gp 2.5s ease-in-out infinite}
+.mesh{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.slide::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.4) 100%)}
+.sl{font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:#f97316;font-weight:600}
+.kc{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.75rem .9rem;transition:transform .2s,box-shadow .2s}
+.kc:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(249,115,22,.1)}
+.ht{background:rgba(255,255,255,.07);border-radius:4px;height:8px;width:100%}
+.hf{height:8px;border-radius:4px;width:0;transition:width .9s ease}
+.prow{display:grid;grid-template-columns:2.4fr .9fr .85fr 1fr;gap:.35rem;padding:.4rem .65rem;border-radius:7px;font-size:.73rem;align-items:center}
+.prow:nth-child(odd){background:rgba(255,255,255,.03)}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- S1 PORTADA -->
+<div class="slide active" data-s="1">
+<div class="mesh">
+  <div class="blob" style="width:500px;height:500px;top:-100px;right:-80px;background:#f97316;opacity:.12;animation:fl 14s ease-in-out infinite"></div>
+  <div class="blob" style="width:300px;height:300px;bottom:-60px;left:-50px;background:#fb923c;opacity:.09;animation:fl 18s ease-in-out infinite reverse"></div>
+</div>
+<div class="content" style="text-align:center">
+  <div style="font-size:4.2rem;margin-bottom:.7rem;animation:bob 3s ease-in-out infinite">📦</div>
+  <div class="sl rv" style="margin-bottom:.6rem">Comité de Inventarios · Corte 30 Marzo 2026</div>
+  <h1 class="rv" style="font-family:'Archivo Black';font-size:clamp(2rem,4.8vw,3.8rem);background:linear-gradient(135deg,#f97316,#fb923c,#fed7aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:.8rem">Análisis de Inventario<br>Ecommerce</h1>
+  <p class="rv" style="font-size:clamp(.82rem,1.2vw,1rem);color:#8b949e;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.3rem">Darkstore Arco Norte &nbsp;·&nbsp; Darkstore GDL <span style="color:#f59e0b;font-size:.75rem">(120 días operando)</span></p>
+  <div class="rv" style="display:flex;justify-content:center;gap:2.2rem;flex-wrap:wrap;margin-bottom:.8rem">
+    <div style="text-align:center"><div class="gp" style="font-family:'Archivo Black';font-size:1.65rem;color:#f97316">$238.5M</div><div style="font-size:.67rem;color:#484f58;text-transform:uppercase;letter-spacing:.07em">Inversión Total</div></div>
+    <div style="text-align:center"><div class="gp" style="font-family:'Archivo Black';font-size:1.65rem;color:#fb923c">15,438</div><div style="font-size:.67rem;color:#484f58;text-transform:uppercase;letter-spacing:.07em">SKUs Únicos Totales</div></div>
+    <div style="text-align:center"><div class="gp" style="font-family:'Archivo Black';font-size:1.65rem;color:#ef4444">61.6%</div><div style="font-size:.67rem;color:#484f58;text-transform:uppercase;letter-spacing:.07em">Capital con DI &gt;121 días</div></div>
+  </div>
+  <div class="rv" style="font-size:.7rem;color:#484f58">11,235 SKUs compartidos entre ambos almacenes (72.8%) · GDL abrió noviembre 2025 · Base: Inv Total sin "No Accionable"</div>
+</div>
+</div>
+
+<!-- S2 RESUMEN EJECUTIVO -->
+<div class="slide" data-s="2">
+<div class="mesh">
+  <div class="blob" style="width:260px;height:260px;top:-50px;right:-50px;background:#f97316;opacity:.07;animation:fl 13s ease-in-out infinite"></div>
+  <div class="blob" style="width:180px;height:180px;bottom:-38px;left:-35px;background:#f59e0b;opacity:.06;animation:fl 17s ease-in-out infinite reverse"></div>
+</div>
+<div class="content">
+  <div class="sl rv" style="margin-bottom:.3rem">Vista General</div>
+  <h2 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.3rem,2.8vw,2rem);margin-bottom:.75rem">Resumen Ejecutivo — KPIs Clave</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-bottom:.75rem">
+    <div class="kc rv" style="border-left:3px solid #f97316">
+      <div class="sl" style="margin-bottom:.2rem">Darkstore Arco Norte</div>
+      <div style="font-family:'Archivo Black';font-size:1.5rem;color:#f97316">$187.5M</div>
+      <div style="font-size:.71rem;color:#8b949e">78.6% del total · 13,849 SKUs</div>
+      <div style="font-size:.68rem;color:#8b949e;margin-top:.15rem">560,898 pzas · stock disponible</div>
+    </div>
+    <div class="kc rv" style="border-left:3px solid #fb923c">
+      <div class="sl" style="margin-bottom:.2rem">Darkstore GDL <span style="color:#f59e0b">·120d</span></div>
+      <div style="font-family:'Archivo Black';font-size:1.5rem;color:#fb923c">$51.0M</div>
+      <div style="font-size:.71rem;color:#8b949e">21.4% del total · 12,912 SKUs</div>
+      <div style="font-size:.68rem;color:#f59e0b;margin-top:.15rem">⚠️ DI &gt;365d = oportunidad en planeación</div>
+    </div>
+    <div class="kc rv" style="border-left:3px solid #22c55e">
+      <div class="sl" style="color:#22c55e;margin-bottom:.2rem">Portafolio Cruzado</div>
+      <div style="font-family:'Archivo Black';font-size:1.5rem;color:#22c55e">15,438 SKUs</div>
+      <div style="font-size:.71rem;color:#8b949e">únicos totales (unión real)</div>
+      <div style="font-size:.68rem;color:#8b949e;margin-top:.15rem">72.8% compartidos · 2,603 solo Arco Norte · 1,661 solo GDL</div>
+    </div>
+    <div class="kc rv" style="border-left:3px solid #ef4444">
+      <div class="sl" style="color:#ef4444;margin-bottom:.2rem">🚨 Capital DI &gt;121d</div>
+      <div style="font-family:'Archivo Black';font-size:1.5rem;color:#ef4444">$146.9M</div>
+      <div style="font-size:.71rem;color:#8b949e">61.6% de la inversión total</div>
+      <div style="font-size:.68rem;color:#8b949e">Con la rotación actual, tomaría &gt;4 meses venderlos</div>
+    </div>
+    <div class="kc rv" style="border-left:3px solid #a855f7">
+      <div class="sl" style="color:#a855f7;margin-bottom:.2rem">Mov. a Tiendas/Outlet</div>
+      <div style="font-family:'Archivo Black';font-size:1.5rem;color:#a855f7">$36.9M</div>
+      <div style="font-size:.71rem;color:#8b949e">4,421 SKUs · Arco Norte $25.7M · GDL $11.2M</div>
+      <div style="font-size:.68rem;color:#8b949e">Candidatos a tiendas con rotación o outlet</div>
+    </div>
+    <div class="kc rv" style="border-left:3px solid #f59e0b">
+      <div class="sl" style="color:#f59e0b;margin-bottom:.2rem">Clase A con DI &gt;121d</div>
+      <div style="font-family:'Archivo Black';font-size:1.5rem;color:#f59e0b">$57.4M</div>
+      <div style="font-size:.71rem;color:#8b949e">3,728 SKUs estratégicos sin suficiente rotación</div>
+      <div style="font-size:.68rem;color:#8b949e">El ABC no está alineado con el canal digital</div>
+    </div>
+  </div>
+  <div class="rv" style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:8px;padding:.5rem .85rem;display:flex;align-items:center;gap:.65rem">
+    <span style="font-size:1rem">💡</span>
+    <span style="font-size:.77rem;color:#fed7aa">El <strong style="color:#f97316">72.8% de los SKUs ya está en ambos almacenes.</strong> El problema no es falta de surtido — es <strong>velocidad de salida insuficiente para la demanda real del canal digital.</strong> Los días de inventario reflejan cuánto tiempo nos tomaría vender el stock con la rotación actual.</span>
+  </div>
+</div>
+</div>
+
+<!-- S3 GRÁFICA 1: DI POR TRAMOS -->
+<div class="slide" data-s="3">
+<div class="mesh">
+  <div class="blob" style="width:270px;height:270px;top:-55px;right:-45px;background:#ef4444;opacity:.07;animation:fl 13s ease-in-out infinite"></div>
+  <div class="blob" style="width:160px;height:160px;bottom:-32px;left:-28px;background:#f97316;opacity:.06;animation:fl 17s ease-in-out infinite reverse"></div>
+</div>
+<div class="content">
+  <div class="sl rv" style="margin-bottom:.25rem">Gráfica 1 · Días de Inventario</div>
+  <h2 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.2rem,2.5vw,1.85rem);margin-bottom:.15rem">¿Cuántos días nos tomará vender el stock con la rotación actual?</h2>
+  <p class="rv" style="font-size:.76rem;color:#8b949e;margin-bottom:.7rem">Inversión ($M) y SKUs por tramo de Días de Inventario — calculado con venta promedio últimos 7 días</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div class="rv" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.85rem;height:250px">
+      <canvas id="cDI"></canvas>
+    </div>
+    <div class="rv" style="display:flex;flex-direction:column;gap:.5rem">
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.7rem">
+        <div style="display:grid;grid-template-columns:115px 1fr 1fr;gap:.25rem;color:#484f58;font-size:.64rem;text-transform:uppercase;margin-bottom:.35rem"><span>Tramo</span><span style="text-align:right">Arco Norte</span><span style="text-align:right">GDL</span></div>
+        <div id="diTbl"></div>
+      </div>
+      <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-radius:9px;padding:.7rem">
+        <div style="font-size:.66rem;font-weight:700;color:#f59e0b;text-transform:uppercase;margin-bottom:.3rem">📊 Lectura correcta</div>
+        <p style="font-size:.73rem;color:#e6edf3;line-height:1.5;margin:0">Con la rotación actual, el <strong style="color:#f97316">61.6% de la inversión ($146.9M) tardaría más de 121 días en venderse.</strong> GDL tiene SKUs con DI &gt;365 días — en un almacén con solo 120 días de operación esto indica una <strong style="color:#f59e0b">oportunidad enorme en planeación y programación.</strong></p>
+      </div>
+      <div style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.15);border-radius:9px;padding:.7rem">
+        <div style="font-size:.66rem;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:.3rem">⚡ Plan de Acción</div>
+        <ul style="font-size:.71rem;color:#e6edf3;line-height:1.6;margin:0;padding-left:.85rem">
+          <li>Activar precio dinámico escalonado para todo SKU con DI &gt;121d esta semana</li>
+          <li>Congelar reórdenes en categorías con DI promedio &gt;60d</li>
+          <li>Transferir GDL → Arco Norte los SKUs con DI bajo en Arco Norte y stock disponible en GDL</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- S4 GRÁFICA 2: ACCIONES -->
+<div class="slide" data-s="4">
+<div class="mesh">
+  <div class="blob" style="width:260px;height:260px;top:-50px;right:-42px;background:#3b82f6;opacity:.07;animation:fl 14s ease-in-out infinite"></div>
+  <div class="blob" style="width:160px;height:160px;bottom:-30px;left:-27px;background:#f97316;opacity:.06;animation:fl 18s ease-in-out infinite reverse"></div>
+</div>
+<div class="content">
+  <div class="sl rv" style="margin-bottom:.25rem">Gráfica 2 · Acciones del Sistema</div>
+  <h2 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.2rem,2.5vw,1.85rem);margin-bottom:.15rem">El Sistema Ya Habló — Falta Ejecutar</h2>
+  <p class="rv" style="font-size:.76rem;color:#8b949e;margin-bottom:.7rem">Distribución de inversión por acción identificada (sin "No Accionable")</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div class="rv" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.85rem;height:260px">
+      <canvas id="cAcc"></canvas>
+    </div>
+    <div class="rv" style="display:flex;flex-direction:column;gap:.5rem">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">
+        <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:9px;padding:.65rem;text-align:center">
+          <div style="font-size:.64rem;color:#ef4444;text-transform:uppercase;margin-bottom:.2rem">Prop. Descuento</div>
+          <div style="font-family:'Archivo Black';font-size:1.25rem;color:#ef4444">$152.6M</div>
+          <div style="font-size:.67rem;color:#8b949e">64.0% del total</div>
+        </div>
+        <div style="background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);border-radius:9px;padding:.65rem;text-align:center">
+          <div style="font-size:.64rem;color:#a855f7;text-transform:uppercase;margin-bottom:.2rem">Mov. Tiendas/Outlet</div>
+          <div style="font-family:'Archivo Black';font-size:1.25rem;color:#a855f7">$22.0M</div>
+          <div style="font-size:.67rem;color:#8b949e">4,722 SKUs candidatos</div>
+        </div>
+      </div>
+      <div style="background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-radius:9px;padding:.7rem">
+        <div style="font-size:.66rem;font-weight:700;color:#ef4444;text-transform:uppercase;margin-bottom:.3rem">📊 Conclusión</div>
+        <p style="font-size:.73rem;color:#e6edf3;line-height:1.5;margin:0"><strong style="color:#ef4444">$204.4M (85.7%) ya tienen acción asignada.</strong> El cuello de botella no es la información — es la velocidad de ejecución. Los $22M para movimiento a tiendas con rotación o tiendas outlet son la acción más limpia: liberan espacio y capital sin liquidación agresiva en el canal digital.</p>
+      </div>
+      <div style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.15);border-radius:9px;padding:.7rem">
+        <div style="font-size:.66rem;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:.3rem">⚡ Plan de Acción</div>
+        <ul style="font-size:.71rem;color:#e6edf3;line-height:1.6;margin:0;padding-left:.85rem">
+          <li><strong>Semana 1:</strong> Identificar tiendas con rotación de estos SKUs para transferencia ($22M)</li>
+          <li><strong>Semana 1–2:</strong> Ejecutar "últimos descuentos" ($18.4M) — los más urgentes</li>
+          <li><strong>Semana 2–4:</strong> Activar campaña de liquidación en tiendas outlet</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- S5 GRÁFICA 3: ABC -->
+<div class="slide" data-s="5">
+<div class="mesh">
+  <div class="blob" style="width:260px;height:260px;top:-50px;right:-42px;background:#22c55e;opacity:.07;animation:fl 13s ease-in-out infinite"></div>
+  <div class="blob" style="width:160px;height:160px;bottom:-30px;left:-27px;background:#f97316;opacity:.05;animation:fl 17s ease-in-out infinite reverse"></div>
+</div>
+<div class="content">
+  <div class="sl rv" style="margin-bottom:.25rem">Gráfica 3 · Clasificación ABC</div>
+  <h2 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.2rem,2.5vw,1.85rem);margin-bottom:.15rem">La Paradoja del Inventario Estratégico</h2>
+  <p class="rv" style="font-size:.76rem;color:#8b949e;margin-bottom:.7rem">$57.4M de Clase A tienen más de 121 días de inventario disponible — el ABC no refleja la realidad del canal digital</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="rv" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.8rem">
+      <div style="text-align:center;font-size:.68rem;font-weight:700;color:#f97316;text-transform:uppercase;margin-bottom:.35rem">Arco Norte — $187.5M · A+B = 69.2%</div>
+      <div style="height:172px;position:relative">
+        <canvas id="cAbcC"></canvas>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center"><div style="font-family:'Archivo Black';font-size:1rem;color:#f97316">69.2%</div><div style="font-size:.58rem;color:#8b949e">A+B</div></div>
+      </div>
+    </div>
+    <div class="rv" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.8rem">
+      <div style="text-align:center;font-size:.68rem;font-weight:700;color:#fb923c;text-transform:uppercase;margin-bottom:.35rem">GDL — $51.0M · A+B = 67.9% · <span style="color:#f59e0b">120 días operando</span></div>
+      <div style="height:172px;position:relative">
+        <canvas id="cAbcG"></canvas>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center"><div style="font-family:'Archivo Black';font-size:1rem;color:#fb923c">67.9%</div><div style="font-size:.58rem;color:#8b949e">A+B</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-top:.8rem">
+    <div class="rv" style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-radius:9px;padding:.65rem">
+      <div style="font-size:.66rem;font-weight:700;color:#f59e0b;text-transform:uppercase;margin-bottom:.3rem">📊 Conclusión</div>
+      <p style="font-size:.72rem;color:#e6edf3;line-height:1.5;margin:0">Clase C acumula <strong>$56.9M combinados</strong>. Lo más crítico: <strong style="color:#f59e0b">3,728 SKUs Clase A con DI &gt;121 días</strong> — el modelo ABC fue diseñado para otro canal o periodo y no refleja la velocidad real del ecommerce.</p>
+    </div>
+    <div class="rv" style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.15);border-radius:9px;padding:.65rem">
+      <div style="font-size:.66rem;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:.3rem">⚡ Plan de Acción</div>
+      <ul style="font-size:.71rem;color:#e6edf3;line-height:1.6;margin:0;padding-left:.85rem">
+        <li>Recalibrar ABC con ventas últimos 90 días del canal ecommerce</li>
+        <li>Clase A con DI &gt;121d: revisar precio, visibilidad y campañas</li>
+        <li>Clase C con DI &gt;90d: oferta automática al 3er mes</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- S6 GRÁFICA 4: CATEGORÍAS -->
+<div class="slide" data-s="6">
+<div class="mesh">
+  <div class="blob" style="width:260px;height:260px;top:-50px;right:-42px;background:#3b82f6;opacity:.07;animation:fl 14s ease-in-out infinite"></div>
+  <div class="blob" style="width:160px;height:160px;bottom:-30px;left:-27px;background:#f97316;opacity:.06;animation:fl 18s ease-in-out infinite reverse"></div>
+</div>
+<div class="content">
+  <div class="sl rv" style="margin-bottom:.25rem">Gráfica 4 · Portafolio de Producto</div>
+  <h2 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.2rem,2.5vw,1.85rem);margin-bottom:.15rem">Composición por Familia y Categorías Top</h2>
+  <p class="rv" style="font-size:.76rem;color:#8b949e;margin-bottom:.7rem">Tenis Casual Urbano = $96.5M combinados (40.5% del total)</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start">
+    <div class="rv" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.85rem;height:260px">
+      <canvas id="cCat"></canvas>
+    </div>
+    <div class="rv" style="display:flex;flex-direction:column;gap:.5rem">
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:.75rem">
+        <div style="font-size:.67rem;color:#8b949e;text-transform:uppercase;font-weight:600;margin-bottom:.5rem;letter-spacing:.05em">Familias de Producto</div>
+        <div id="famBars"></div>
+      </div>
+      <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);border-radius:9px;padding:.65rem">
+        <div style="font-size:.66rem;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:.3rem">📊 Conclusión</div>
+        <p style="font-size:.72rem;color:#e6edf3;line-height:1.5;margin:0"><strong>Calzado Caballero absorbe $154.8M (64.9%).</strong> Ropa representa el 16.1% en GDL vs 15.0% en Arco Norte — perfiles de demanda distintos que el surtido actual no está respetando.</p>
+      </div>
+      <div style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.15);border-radius:9px;padding:.65rem">
+        <div style="font-size:.66rem;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:.3rem">⚡ Plan de Acción</div>
+        <ul style="font-size:.71rem;color:#e6edf3;line-height:1.6;margin:0;padding-left:.85rem">
+          <li>Auditar DI de Tenis Casual Urbano por talla/color</li>
+          <li>Definir mix de Ropa GDL vs Arco Norte según demanda local real</li>
+          <li>Priorizar resurtido en SKUs con DI &lt;30d antes de romper stock</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- S7 OPORTUNIDAD: GDL → ARCO NORTE (DATOS REALES) -->
+<div class="slide" data-s="7">
+<div class="mesh">
+  <div class="blob" style="width:280px;height:280px;top:-55px;right:-45px;background:#22c55e;opacity:.09;animation:fl 13s ease-in-out infinite"></div>
+  <div class="blob" style="width:175px;height:175px;bottom:-35px;left:-32px;background:#3b82f6;opacity:.07;animation:fl 17s ease-in-out infinite reverse"></div>
+</div>
+<div class="content">
+  <div class="sl rv" style="margin-bottom:.25rem">Slide 7 · Propuesta de Movimiento</div>
+  <h2 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.2rem,2.5vw,1.85rem);margin-bottom:.1rem">Stock en GDL que <span style="color:#22c55e">Arco Norte Necesita</span></h2>
+  <p class="rv" style="font-size:.75rem;color:#8b949e;margin-bottom:.65rem">SKUs con existencia en GDL que no están o están por agotarse en Arco Norte (DI ≤30 días) · Datos reales del archivo</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+    <div style="display:flex;flex-direction:column;gap:.55rem">
+      <div class="rv" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:.75rem">
+        <div style="font-size:.64rem;font-weight:700;color:#3b82f6;text-transform:uppercase;margin-bottom:.4rem">📦 Caso 1 — En GDL, NO están en Arco Norte</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;text-align:center">
+          <div><div style="font-family:'Archivo Black';font-size:1.2rem;color:#3b82f6">1,587</div><div style="font-size:.62rem;color:#8b949e">IDs únicos</div></div>
+          <div><div style="font-family:'Archivo Black';font-size:1.2rem;color:#3b82f6">7,296</div><div style="font-size:.62rem;color:#8b949e">piezas en GDL</div></div>
+          <div><div style="font-family:'Archivo Black';font-size:1.2rem;color:#3b82f6">$2.76M</div><div style="font-size:.62rem;color:#8b949e">inversión GDL</div></div>
+        </div>
+      </div>
+      <div class="rv" style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:10px;padding:.75rem">
+        <div style="font-size:.64rem;font-weight:700;color:#f97316;text-transform:uppercase;margin-bottom:.4rem">⚡ Caso 2 — En GDL con stock, Arco Norte con DI ≤30d</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;text-align:center">
+          <div><div style="font-family:'Archivo Black';font-size:1.2rem;color:#f97316">1,641</div><div style="font-size:.62rem;color:#8b949e">IDs únicos</div></div>
+          <div><div style="font-family:'Archivo Black';font-size:1.2rem;color:#f97316">20,015</div><div style="font-size:.62rem;color:#8b949e">piezas en GDL</div></div>
+          <div><div style="font-family:'Archivo Black';font-size:1.2rem;color:#f97316">$6.14M</div><div style="font-size:.62rem;color:#8b949e">inversión GDL</div></div>
+        </div>
+        <div style="font-size:.65rem;color:#f59e0b;margin-top:.3rem">DI promedio en Arco Norte: <strong>17 días</strong> — a punto de romperse</div>
+      </div>
+      <div class="rv" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);border-radius:10px;padding:.75rem">
+        <div style="font-size:.64rem;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:.4rem">🚀 Propuesta Total (Casos 1 + 2)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;text-align:center">
+          <div><div style="font-family:'Archivo Black';font-size:1.35rem;color:#22c55e">3,228</div><div style="font-size:.62rem;color:#8b949e">IDs a mover</div></div>
+          <div><div style="font-family:'Archivo Black';font-size:1.35rem;color:#22c55e">27,311</div><div style="font-size:.62rem;color:#8b949e">piezas totales</div></div>
+          <div><div style="font-family:'Archivo Black';font-size:1.35rem;color:#22c55e">$8.90M</div><div style="font-size:.62rem;color:#8b949e">inversión a mover</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.55rem">
+      <div class="rv" style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.75rem">
+        <div style="font-size:.64rem;font-weight:700;color:#8b949e;text-transform:uppercase;margin-bottom:.5rem">Cómo quedaría Arco Norte después del movimiento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem;font-size:.71rem">
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:.45rem .55rem">
+            <div style="color:#484f58;font-size:.62rem;margin-bottom:.15rem">SKUs únicos Arco Norte</div>
+            <div style="color:#f97316;font-weight:700">13,849 → <span style="color:#22c55e">15,436</span></div>
+            <div style="font-size:.6rem;color:#484f58">+1,587 IDs nuevos</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:.45rem .55rem">
+            <div style="color:#484f58;font-size:.62rem;margin-bottom:.15rem">Inversión Arco Norte</div>
+            <div style="color:#f97316;font-weight:700">$187.5M → <span style="color:#22c55e">$196.4M</span></div>
+            <div style="font-size:.6rem;color:#484f58">+$8.9M transferido</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:.45rem .55rem">
+            <div style="color:#484f58;font-size:.62rem;margin-bottom:.15rem">Riesgo quiebre stock</div>
+            <div style="color:#ef4444;font-weight:700">1,641 SKUs → <span style="color:#22c55e">0</span></div>
+            <div style="font-size:.6rem;color:#484f58">DI &lt;30d resuelto</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:.45rem .55rem">
+            <div style="color:#484f58;font-size:.62rem;margin-bottom:.15rem">GDL — DI mejorado</div>
+            <div style="color:#fb923c;font-weight:700">$51.0M → <span style="color:#22c55e">$42.1M</span></div>
+            <div style="font-size:.6rem;color:#484f58">-$8.9M mejora rotación GDL</div>
+          </div>
+        </div>
+      </div>
+      <div class="rv" style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-radius:9px;padding:.65rem">
+        <div style="font-size:.64rem;font-weight:700;color:#f59e0b;text-transform:uppercase;margin-bottom:.3rem">⚠️ Por qué sucede esto — GDL 120 días</div>
+        <p style="font-size:.72rem;color:#e6edf3;line-height:1.55;margin:0">GDL recibió portafolio amplio al abrir (nov-2025) pero la demanda por plaza es diferente. Hay <strong style="color:#f59e0b">stock disponible en GDL de SKUs que Arco Norte está a punto de agotar</strong> — coordinación entre almacenes es la solución más rápida y sin costo.</p>
+      </div>
+      <div class="rv" style="background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.15);border-radius:9px;padding:.6rem">
+        <div style="font-size:.64rem;font-weight:700;color:#22c55e;text-transform:uppercase;margin-bottom:.25rem">Top Categorías a Mover GDL → Arco Norte</div>
+        <div style="font-size:.7rem;color:#e6edf3;line-height:1.8">
+          🥇 Tenis Casual Urbano &nbsp;<span style="color:#22c55e">$2.9M · mayor volumen</span><br>
+          🥈 Ropa Casual &nbsp;<span style="color:#22c55e">$1.3M · alta rotación</span><br>
+          🥉 Tenis Deportivo &nbsp;<span style="color:#22c55e">$1.1M · demanda activa</span><br>
+          4° Casual Caballero &nbsp;<span style="color:#22c55e">$0.7M</span> &nbsp; 5° Confort &nbsp;<span style="color:#22c55e">$0.4M</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- S8 CONCLUSIONES -->
+<div class="slide" data-s="8">
+<div class="mesh">
+  <div class="blob" style="width:280px;height:280px;top:-60px;right:-50px;background:#f97316;opacity:.08;animation:fl 13s ease-in-out infinite"></div>
+  <div class="blob" style="width:190px;height:190px;bottom:-40px;left:-35px;background:#22c55e;opacity:.07;animation:fl 17s ease-in-out infinite reverse"></div>
+</div>
+<div class="content">
+  <div class="sl rv" style="margin-bottom:.35rem">Síntesis</div>
+  <h2 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.4rem,3vw,2.1rem);margin-bottom:.85rem">3 Conclusiones para el Comité</h2>
+  <div style="display:flex;flex-direction:column;gap:.7rem">
+    <div class="rv" style="display:flex;gap:.85rem;align-items:flex-start;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);border-left:4px solid #ef4444;border-radius:9px;padding:.8rem">
+      <div style="font-size:1.35rem;flex-shrink:0">🔴</div>
+      <div>
+        <div style="font-weight:700;color:#ef4444;font-size:.85rem;margin-bottom:.22rem">1. Con la rotación actual, el ecommerce tardaría 4+ meses en liquidar el 61.6% del inventario</div>
+        <p style="font-size:.74rem;color:#e6edf3;line-height:1.55;margin:0">El DI calculado con la venta de los últimos 7 días muestra $146.9M con más de 121 días de cobertura. <strong>El 72.8% de los SKUs ya está en ambos almacenes</strong> — no falta producto, falta velocidad comercial de salida.</p>
+      </div>
+    </div>
+    <div class="rv" style="display:flex;gap:.85rem;align-items:flex-start;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-left:4px solid #f59e0b;border-radius:9px;padding:.8rem">
+      <div style="font-size:1.35rem;flex-shrink:0">🟡</div>
+      <div>
+        <div style="font-weight:700;color:#f59e0b;font-size:.85rem;margin-bottom:.22rem">2. GDL con DI &gt;365d en 120 días de operación = señal de alerta en Planeación, no en el canal</div>
+        <p style="font-size:.74rem;color:#e6edf3;line-height:1.55;margin:0">No es pérdida de inventario — se surtieron volúmenes sin considerar la demanda real por plaza. <strong style="color:#f59e0b">Esto le corresponde directamente al área de Planeación y Programación</strong> revisar el modelo de distribución inicial para GDL.</p>
+      </div>
+    </div>
+    <div class="rv" style="display:flex;gap:.85rem;align-items:flex-start;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-left:4px solid #22c55e;border-radius:9px;padding:.8rem">
+      <div style="font-size:1.35rem;flex-shrink:0">🟢</div>
+      <div>
+        <div style="font-weight:700;color:#22c55e;font-size:.85rem;margin-bottom:.22rem">3. GDL tiene $8.9M en stock que Arco Norte necesita ahora — 3,228 IDs, acción inmediata</div>
+        <p style="font-size:.74rem;color:#e6edf3;line-height:1.55;margin:0">1,641 SKUs en Arco Norte tienen DI promedio de solo <strong>17 días</strong> y GDL tiene ese mismo producto disponible. Más 1,587 IDs que directamente no están en Arco Norte. <strong>Moverlos es la acción de mayor impacto inmediato: sin costo, sin descuento, sin riesgo.</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- S9 PLAN DE ACCIÓN -->
+<div class="slide" data-s="9">
+<div class="mesh">
+  <div class="blob" style="width:270px;height:270px;top:-52px;right:-48px;background:#22c55e;opacity:.07;animation:fl 14s ease-in-out infinite"></div>
+  <div class="blob" style="width:175px;height:175px;bottom:-36px;left:-32px;background:#3b82f6;opacity:.06;animation:fl 18s ease-in-out infinite reverse"></div>
+</div>
+<div class="content">
+  <div class="sl rv" style="margin-bottom:.3rem">Próximos Pasos</div>
+  <h2 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.4rem,3vw,2.1rem);margin-bottom:.8rem">Plan de Acción — Priorizado por Impacto</h2>
+  <div class="rv" style="display:grid;grid-template-columns:2.4fr .9fr .85fr 1fr;gap:.35rem;padding:.3rem .65rem;font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:#484f58;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:.2rem">
+    <span>Acción</span><span>Responsable</span><span>Plazo</span><span>Meta / Impacto</span>
+  </div>
+  <div id="planRows"></div>
+  <div class="rv" style="margin-top:.7rem;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:8px;padding:.55rem .8rem;display:flex;align-items:center;gap:.65rem">
+    <span style="font-size:.95rem">🎯</span>
+    <span style="font-size:.75rem;color:#fed7aa">Objetivo 90 días: reducir DI ponderado <strong style="color:#f97316">Arco Norte &lt;90d y GDL &lt;75d</strong> — mover 3,228 IDs de GDL a Arco Norte, transferir $36.9M de descontinuados a tiendas/outlet, y activar precio dinámico en todo SKU con DI &gt;121d.</span>
+  </div>
+</div>
+</div>
+
+<!-- S10 CIERRE -->
+<div class="slide" data-s="10">
+<div class="mesh">
+  <div class="blob" style="width:460px;height:460px;top:-90px;right:-70px;background:#f97316;opacity:.12;animation:fl 13s ease-in-out infinite"></div>
+  <div class="blob" style="width:270px;height:270px;bottom:-55px;left:-42px;background:#22c55e;opacity:.09;animation:fl 17s ease-in-out infinite reverse"></div>
+  <div class="blob" style="width:180px;height:180px;top:40%;left:13%;background:#3b82f6;opacity:.07;animation:fl 15s ease-in-out infinite"></div>
+</div>
+<div class="content" style="text-align:center">
+  <div style="font-size:3.8rem;margin-bottom:.65rem;animation:bob 3s ease-in-out infinite">📊</div>
+  <h1 class="rv" style="font-family:'Archivo Black';font-size:clamp(1.9rem,4.5vw,3.2rem);background:linear-gradient(135deg,#22c55e,#f97316,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.65rem">Gracias</h1>
+  <p class="rv" style="font-size:clamp(.8rem,1.2vw,1rem);color:#8b949e;letter-spacing:.08em;margin-bottom:1.2rem">Análisis Inventario Ecommerce · Arco Norte & GDL · Marzo 2026</p>
+  <div class="rv" style="display:flex;justify-content:center;gap:2.2rem;flex-wrap:wrap">
+    <div style="text-align:center"><div style="font-family:'Archivo Black';font-size:1.4rem;color:#22c55e">3,228 IDs</div><div style="font-size:.66rem;color:#484f58;text-transform:uppercase;letter-spacing:.06em">GDL → Arco Norte</div></div>
+    <div style="text-align:center"><div style="font-family:'Archivo Black';font-size:1.4rem;color:#22c55e">$8.9M</div><div style="font-size:.66rem;color:#484f58;text-transform:uppercase;letter-spacing:.06em">Stock a Reubicar</div></div>
+    <div style="text-align:center"><div style="font-family:'Archivo Black';font-size:1.4rem;color:#a855f7">$36.9M</div><div style="font-size:.66rem;color:#484f58;text-transform:uppercase;letter-spacing:.06em">A Tiendas/Outlet</div></div>
+    <div style="text-align:center"><div style="font-family:'Archivo Black';font-size:1.4rem;color:#f97316">$146.9M</div><div style="font-size:.66rem;color:#484f58;text-transform:uppercase;letter-spacing:.06em">DI &gt;121d a atacar</div></div>
+  </div>
+  <div class="rv" style="margin-top:.9rem;font-size:.68rem;color:#484f58">15,438 SKUs únicos · 26,709 registros · GDL: 120 días operando desde nov-2025 · Hojas: Darkstore & Darkstore GDL</div>
+</div>
+</div>
+
+</div><!-- /deck -->
+
+<div class="nav">
+  <button class="nbtn" onclick="go(-1)">&#8249;</button>
+  <div class="dots" id="dots"></div>
+  <button class="nbtn" onclick="go(1)">&#8250;</button>
+  <span class="ctr" id="ctr">1 / 10</span>
+</div>
+
+<script>
+let cur=1;const tot=document.querySelectorAll('.slide').length;
+const dotsEl=document.getElementById('dots'),ctrEl=document.getElementById('ctr');
+for(let i=1;i<=tot;i++){const d=document.createElement('div');d.className='dot'+(i===1?' on':'');d.onclick=()=>goTo(i);dotsEl.appendChild(d);}
+function goTo(n){document.querySelector('.slide.active').classList.remove('active');const nxt=document.querySelector(`.slide[data-s="${n}"]`);nxt.classList.add('active');cur=n;updateNav();anim(nxt);}
+function go(d){let n=cur+d;if(n<1)n=tot;if(n>tot)n=1;goTo(n);}
+function updateNav(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i+1===cur));ctrEl.textContent=cur+' / '+tot;}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1);}if(e.key==='ArrowLeft'){e.preventDefault();go(-1);}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});
+document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)go(d>0?1:-1);});
+function anim(slide){
+  slide.querySelectorAll('.rv').forEach((el,i)=>{
+    el.style.transition='none';el.style.opacity='0';el.style.transform='translateY(14px)';
+    el.offsetHeight;const dl=i*.06;
+    el.style.transition=`opacity .3s ease ${dl}s,transform .3s ease ${dl}s`;
+    el.style.opacity='1';el.style.transform='translateY(0)';
+  });
+  slide.querySelectorAll('.hf:not(.fi)').forEach((b,i)=>{
+    b.classList.add('fi');b.style.width='0';b.style.transition=`width .85s ease ${i*.07}s`;
+    b.offsetHeight;b.style.width=b.dataset.w+'%';
+  });
+}
+Chart.defaults.color='#8b949e';Chart.defaults.font.family='DM Sans';Chart.defaults.font.size=10;
+function hexRgba(h,a){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return `rgba(${r},${g},${b},${a})`;}
+const tc=['#22c55e','#84cc16','#f59e0b','#f97316','#ef4444','#dc2626'];
+const diCdmx=[2.65,8.30,30.60,41.10,53.19,51.74],diGdl=[0.33,0.79,2.82,5.05,6.77,35.21];
+const diSkuC=[1583,1025,1974,2100,2050,5117],diSkuG=[381,309,660,911,730,9921];
+new Chart(document.getElementById('cDI'),{type:'bar',data:{labels:['0-15d','16-30d','31-60d','61-120d','121-365d','>365d'],
+datasets:[
+  {label:'Arco Norte',data:diCdmx,backgroundColor:tc.map(c=>hexRgba(c,.75)),borderColor:tc,borderWidth:1.5,borderRadius:3},
+  {label:'GDL',data:diGdl,backgroundColor:tc.map(c=>hexRgba(c,.35)),borderColor:tc,borderWidth:1,borderRadius:3}
+]},options:{responsive:true,maintainAspectRatio:false,
+plugins:{legend:{position:'top',labels:{boxWidth:9,padding:6}},
+tooltip:{callbacks:{label:ctx=>{const i=ctx.dataIndex;return ctx.dataset.label==='Arco Norte'?` $${ctx.parsed.y}M · ${diSkuC[i].toLocaleString()} SKUs`:` $${ctx.parsed.y}M · ${diSkuG[i].toLocaleString()} SKUs`;}}}},
+scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:8}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>'$'+v+'M',font:{size:9}}}}}});
+const dtEl=document.getElementById('diTbl');
+const dn=['0-15d Óptimo','16-30d Saludable','31-60d Alerta','61-120d Crítico','121-365d Exceso','>365d Stock Largo'];
+dn.forEach((n,i)=>{const r=document.createElement('div');r.style.cssText='display:grid;grid-template-columns:115px 1fr 1fr;gap:.25rem;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.69rem;align-items:center;';
+r.innerHTML=`<span style="color:${tc[i]};font-weight:600;font-size:.66rem">${n}</span><span style="text-align:right">$${diCdmx[i]}M<br><span style="font-size:.6rem;color:#484f58">${diSkuC[i].toLocaleString()} SK</span></span><span style="text-align:right">$${diGdl[i]}M<br><span style="font-size:.6rem;color:#484f58">${diSkuG[i].toLocaleString()} SK</span></span>`;dtEl.appendChild(r);});
+const accLbl=['Resurtir','Últimos Desctos.','Mov. Tiendas/Outlet','Alerta DI Elevado','Prop. de Descuento'];
+const accInv=[12.05,18.40,22.00,33.42,152.61],accPct=[5.1,7.7,9.2,14.0,64.0];
+const accCol=['#22c55e','#f59e0b','#a855f7','#f97316','#ef4444'];
+new Chart(document.getElementById('cAcc'),{type:'bar',data:{labels:accLbl,
+datasets:[{data:accInv,backgroundColor:accCol.map(c=>hexRgba(c,.85)),borderColor:accCol,borderWidth:1.5,borderRadius:4}]},
+options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` $${ctx.parsed.x}M (${accPct[ctx.dataIndex]}%)`}}},
+scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>'$'+v+'M',font:{size:9}}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:9}}}}}});
+const abcLbl=['A','B','C','Sin Clasif','Otros'];
+const abcCol=['#22c55e','#3b82f6','#f59e0b','#8b949e','#484f58'];
+function mkD(id,vals){new Chart(document.getElementById(id),{type:'doughnut',data:{labels:abcLbl,datasets:[{data:vals,backgroundColor:abcCol.map(c=>hexRgba(c,.85)),borderColor:abcCol,borderWidth:1.5,hoverOffset:5}]},
+options:{responsive:true,maintainAspectRatio:false,cutout:'63%',
+plugins:{legend:{position:'right',labels:{boxWidth:8,padding:5,font:{size:9}}},tooltip:{callbacks:{label:ctx=>` $${ctx.parsed.toFixed(1)}M`}}}}});}
+mkD('cAbcC',[94.04,35.80,44.33,11.55,1.88]);mkD('cAbcG',[25.18,9.42,12.62,3.20,0.55]);
+const catLbl=['Vestir','Confort','Casual','Ropa Casual','Tenis Deportivo','Tenis Casual Urb.'];
+const catC=[4.38,9.87,11.22,20.30,30.60,78.00],catG=[1.56,2.78,3.72,7.45,6.99,18.52];
+new Chart(document.getElementById('cCat'),{type:'bar',data:{labels:catLbl,
+datasets:[
+  {label:'Arco Norte',data:catC,backgroundColor:hexRgba('#f97316',.8),borderColor:'#f97316',borderWidth:1.5,borderRadius:3},
+  {label:'GDL',data:catG,backgroundColor:hexRgba('#3b82f6',.7),borderColor:'#3b82f6',borderWidth:1.5,borderRadius:3}
+]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+plugins:{legend:{position:'top',labels:{boxWidth:9,padding:6}}},
+scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>'$'+v+'M',font:{size:9}},max:90},
+y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{font:{size:9}}}}}});
+const famD=[{n:'Cal. Caballero',c:124.02,g:30.76,max:124},{n:'Cal. Dama',c:30.44,g:8.57,max:124},{n:'Ropa',c:28.10,g:10.23,max:124},{n:'Otros',c:4.65,g:1.34,max:124},{n:'Toons',c:.30,g:.05,max:124}];
+const fbEl=document.getElementById('famBars');
+famD.forEach(f=>{const d=document.createElement('div');d.style.cssText='font-size:.68rem;margin-bottom:.3rem';
+d.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="color:#e6edf3">${f.n}</span><span style="color:#8b949e">$${f.c}M / $${f.g}M</span></div><div style="display:flex;flex-direction:column;gap:2px"><div class="ht"><div class="hf" data-w="${(f.c/f.max*100).toFixed(0)}" style="background:linear-gradient(90deg,#f97316,#fb923c)"></div></div><div class="ht"><div class="hf" data-w="${(f.g/f.max*100).toFixed(0)}" style="background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div></div>`;fbEl.appendChild(d);});
+const fl2=document.createElement('div');fl2.style.cssText='display:flex;gap:.7rem;margin-top:.3rem;font-size:.65rem;color:#8b949e';
+fl2.innerHTML='<span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:3px;background:#f97316;border-radius:2px;display:inline-block"></span>Arco Norte</span><span style="display:flex;align-items:center;gap:3px"><span style="width:10px;height:3px;background:#3b82f6;border-radius:2px;display:inline-block"></span>GDL</span>';
+fbEl.appendChild(fl2);
+const plan=[
+  {a:'🟢 Mover 3,228 IDs GDL → Arco Norte ($8.9M)',r:'Logística',p:'Semana 1',m:'Evitar quiebre stock'},
+  {a:'🔵 Identificar tiendas rotación → mover $22M',r:'Ops+Producto',p:'Semana 1',m:'Liberar canal digital'},
+  {a:'🔴 Descontinuados → Outlet/Tiendas -40%',r:'Producto+Ecomm',p:'Semana 1',m:'Activar $36.9M'},
+  {a:'🟠 Últimos descuentos — ejecutar ya',r:'Ecommerce',p:'Semana 1–2',m:'Liquidar $18.4M'},
+  {a:'🟡 Precio dinámico en SKUs con DI >121d',r:'Ecomm+Compras',p:'Semana 2–4',m:'Reducir DI masivo'},
+  {a:'⚪ Detener surtido GDL hasta DI <90d',r:'Planeación',p:'Inmediato',m:'Evitar acumulación'},
+  {a:'🟣 Revisar modelo distribución GDL (Luis V.)',r:'Planeación',p:'Mes 1',m:'Corregir la raíz'},
+  {a:'⚡ Recalibrar ABC con ventas ecommerce 90d',r:'BI',p:'Mes 1',m:'Decisiones correctas'},
+];
+const prEl=document.getElementById('planRows');
+plan.forEach(p=>{const r=document.createElement('div');r.className='prow rv';
+r.innerHTML=`<span style="color:#e6edf3">${p.a}</span><span style="color:#8b949e;font-size:.7rem">${p.r}</span><span style="color:#f59e0b;font-weight:600">${p.p}</span><span style="color:#22c55e;font-weight:600">${p.m}</span>`;prEl.appendChild(r);});
+anim(document.querySelector('.slide.active'));
+</script>
+</body>
+</html>
