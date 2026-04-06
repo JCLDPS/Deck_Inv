@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis Estratégico de Inventario — Ecom 6 Abril 2026</title>
+<style>
+  :root {
+    --rojo:#dc2626;--naranja:#f97316;--amarillo:#f59e0b;
+    --verde:#16a34a;--azul:#6366f1;--morado:#8b5cf6;
+    --gris:#64748b;--fondo:#f8fafc;--blanco:#ffffff;
+    --borde:#e2e8f0;--texto:#1e293b;--subtexto:#475569;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:var(--fondo);color:var(--texto);}
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--blanco);
+       border-bottom:1px solid var(--borde);display:flex;align-items:center;
+       justify-content:space-between;padding:0 32px;height:56px;
+       box-shadow:0 1px 4px rgba(0,0,0,.07);}
+  .nav-logo{font-weight:700;font-size:15px;color:var(--azul);}
+  .nav-tabs{display:flex;gap:4px;}
+  .nav-tab{padding:6px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;
+           border:none;background:transparent;color:var(--subtexto);transition:all .2s;}
+  .nav-tab.active,.nav-tab:hover{background:var(--azul);color:#fff;}
+  .nav-date{font-size:12px;color:var(--gris);}
+  .slide{display:none;padding:76px 48px 48px;max-width:1300px;margin:0 auto;min-height:100vh;}
+  .slide.active{display:block;}
+  .slide-header{margin-bottom:28px;}
+  .slide-num{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--azul);margin-bottom:6px;}
+  .slide-title{font-size:30px;font-weight:800;line-height:1.2;color:var(--texto);}
+  .slide-sub{font-size:14.5px;color:var(--subtexto);margin-top:8px;line-height:1.5;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+  .kpi{background:var(--blanco);border-radius:12px;padding:18px 22px;border:1px solid var(--borde);
+       border-left:4px solid var(--azul);box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .kpi.r{border-left-color:var(--rojo);}
+  .kpi.o{border-left-color:var(--naranja);}
+  .kpi.g{border-left-color:var(--verde);}
+  .kpi.y{border-left-color:var(--amarillo);}
+  .kpi-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gris);margin-bottom:5px;}
+  .kpi-val{font-size:26px;font-weight:800;line-height:1;}
+  .kpi-val.r{color:var(--rojo);}  .kpi-val.o{color:var(--naranja);}
+  .kpi-val.g{color:var(--verde);}  .kpi-val.a{color:var(--azul);}
+  .kpi-desc{font-size:11.5px;color:var(--subtexto);margin-top:5px;}
+  .zone-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+  .zone-card{border-radius:10px;padding:16px;border:2px solid transparent;text-align:center;}
+  .zv{background:#f0fdf4;border-color:#86efac;}
+  .zl{background:#f7fee7;border-color:#bef264;}
+  .za{background:#fffbeb;border-color:#fde68a;}
+  .zn{background:#fff7ed;border-color:#fed7aa;}
+  .zr{background:#fef2f2;border-color:#fca5a5;}
+  .zone-pct{font-size:34px;font-weight:900;line-height:1;}
+  .zone-inv{font-size:16px;font-weight:700;margin-top:4px;}
+  .zone-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-top:6px;color:var(--gris);}
+  .zone-pzs{font-size:10.5px;color:var(--subtexto);margin-top:3px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+  .grid2-asym{display:grid;grid-template-columns:1.45fr 1fr;gap:20px;margin-bottom:24px;}
+  .card{background:var(--blanco);border-radius:12px;padding:22px;border:1px solid var(--borde);box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .card-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--subtexto);margin-bottom:14px;}
+  .alerta{background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;
+          padding:14px 18px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;}
+  .alerta-icon{font-size:20px;flex-shrink:0;}
+  .alerta-text{font-size:13px;line-height:1.6;color:#7f1d1d;}
+  .alerta-text strong{color:var(--rojo);}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+  .bar-label{font-size:12px;font-weight:600;width:140px;flex-shrink:0;}
+  .bar-wrap{flex:1;background:#f1f5f9;border-radius:4px;height:24px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;
+            padding-left:8px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;}
+  .bar-stack{display:flex;height:24px;border-radius:4px;overflow:hidden;}
+  .bar-val{font-size:11.5px;font-weight:700;color:var(--subtexto);width:72px;flex-shrink:0;text-align:right;}
+  .tienda-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;}
+  .tienda-card{border-radius:12px;padding:20px;border:2px solid;}
+  .tc-ds{background:#eff6ff;border-color:#93c5fd;}
+  .tc-gdl{background:#fef2f2;border-color:#fca5a5;}
+  .tienda-name{font-size:14px;font-weight:800;text-transform:uppercase;margin-bottom:12px;}
+  .tn-ds{color:#1d4ed8;} .tn-gdl{color:var(--rojo);}
+  .tienda-stat{display:flex;justify-content:space-between;align-items:center;
+               padding:6px 0;border-bottom:1px solid rgba(0,0,0,.07);}
+  .tienda-stat:last-child{border-bottom:none;}
+  .t-key{font-size:12px;color:var(--subtexto);}
+  .t-val{font-size:13.5px;font-weight:700;}
+  .t-val.danger{color:var(--rojo);} .t-val.ok{color:var(--verde);}
+  .acc-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .acc-table th{background:#f1f5f9;padding:10px 12px;text-align:left;font-size:11px;
+                font-weight:700;letter-spacing:.7px;text-transform:uppercase;
+                color:var(--gris);border-bottom:2px solid var(--borde);}
+  .acc-table td{padding:10px 12px;border-bottom:1px solid var(--borde);vertical-align:middle;}
+  .acc-table tr:hover td{background:#f8fafc;}
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+  .badge.r{background:#fef2f2;color:var(--rojo);}
+  .badge.o{background:#fff7ed;color:#c2410c;}
+  .badge.y{background:#fffbeb;color:#a16207;}
+  .prog-wrap{background:#f1f5f9;border-radius:4px;height:7px;width:100px;display:inline-block;vertical-align:middle;margin-left:6px;}
+  .prog-fill{height:100%;border-radius:4px;}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-right:8px;}
+  .pill.g{background:#f0fdf4;color:#166534;}
+  .pill.r{background:#fef2f2;color:#7f1d1d;}
+  .footer{text-align:center;padding:20px;font-size:11px;color:var(--gris);border-top:1px solid var(--borde);margin-top:36px;}
+  .nota{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;
+        font-size:12px;color:#713f12;margin-top:10px;}
+  @media(max-width:900px){.kpi-grid{grid-template-columns:1fr 1fr;}
+    .grid2,.grid2-asym,.tienda-grid{grid-template-columns:1fr;}
+    .zone-grid{grid-template-columns:1fr 1fr;}.slide{padding:70px 18px 28px;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">📦 Inventario Ecom</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSlide(1)">01 · Crisis Rotación</button>
+    <button class="nav-tab" onclick="showSlide(2)">02 · DS vs GDL</button>
+    <button class="nav-tab" onclick="showSlide(3)">03 · División &amp; Estatus</button>
+    <button class="nav-tab" onclick="showSlide(4)">04 · Plan de Acción</button>
+  </div>
+  <div class="nav-date">Corte: 6 Abril 2026</div>
+</nav>
+
+<!-- SLIDE 1 -->
+<section class="slide active" id="slide1">
+  <div class="slide-header">
+    <div class="slide-num">Slide 01 / 04</div>
+    <div class="slide-title">🚨 87.2% del Capital Está en Zona de Riesgo</div>
+    <div class="slide-sub">
+      Fórmula: <strong>Días Inv = Piezas ÷ Sugerido Diario 7d</strong> &nbsp;·&nbsp;
+      Cobertura global: <strong>114 días</strong> &nbsp;·&nbsp; Benchmark ecom: <strong>45 días</strong> &nbsp;·&nbsp;
+      El inventario está <strong>2.5x por encima del nivel óptimo</strong>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi r">
+      <div class="kpi-label">Inversión Total</div>
+      <div class="kpi-val r">$227.7M</div>
+      <div class="kpi-desc">713,661 piezas · 15,038 SKUs únicos</div>
+    </div>
+    <div class="kpi r">
+      <div class="kpi-label">Capital en Riesgo (&gt;60d)</div>
+      <div class="kpi-val r">87.2%</div>
+      <div class="kpi-desc">$198.6M · Solo 12.8% rota correctamente</div>
+    </div>
+    <div class="kpi o">
+      <div class="kpi-label">Exceso Absoluto &gt;180d</div>
+      <div class="kpi-val o">$129.2M</div>
+      <div class="kpi-desc">56.8% del capital · 12,975 SKUs</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Cobertura Promedio</div>
+      <div class="kpi-val a">114 días</div>
+      <div class="kpi-desc">2.5x sobre benchmark de 45d · fórmula: ∑pzas ÷ ∑sug.diario</div>
+    </div>
+  </div>
+
+  <div class="zone-grid">
+    <div class="zone-card zv">
+      <div class="zone-pct" style="color:#16a34a">3.1%</div>
+      <div class="zone-inv" style="color:#16a34a">$7.0M</div>
+      <div class="zone-label">Óptimo ≤30d</div>
+      <div class="zone-pzs">22,740 pzs · 1,839 SKUs</div>
+    </div>
+    <div class="zone-card zl">
+      <div class="zone-pct" style="color:#65a30d">9.7%</div>
+      <div class="zone-inv" style="color:#65a30d">$22.1M</div>
+      <div class="zone-label">Aceptable 31–60d</div>
+      <div class="zone-pzs">70,127 pzs · 1,830 SKUs</div>
+    </div>
+    <div class="zone-card za">
+      <div class="zone-pct" style="color:#d97706">10.4%</div>
+      <div class="zone-inv" style="color:#d97706">$23.6M</div>
+      <div class="zone-label">Alto 61–90d</div>
+      <div class="zone-pzs">71,753 pzs · 1,475 SKUs</div>
+    </div>
+    <div class="zone-card zn">
+      <div class="zone-pct" style="color:#ea580c">20.1%</div>
+      <div class="zone-inv" style="color:#ea580c">$45.7M</div>
+      <div class="zone-label">Crítico 91–180d</div>
+      <div class="zone-pzs">136,301 pzs · 2,447 SKUs</div>
+    </div>
+    <div class="zone-card zr">
+      <div class="zone-pct" style="color:#dc2626">56.8%</div>
+      <div class="zone-inv" style="color:#dc2626">$129.2M</div>
+      <div class="zone-label">Exceso &gt;180d</div>
+      <div class="zone-pzs">412,740 pzs · 12,975 SKUs</div>
+    </div>
+  </div>
+
+  <div class="alerta">
+    <div class="alerta-icon">🔴</div>
+    <div class="alerta-text">
+      <strong>Con <strong>114 días de cobertura global</strong> (713,661 pzas ÷ 6,269 sug. diario), el inventario agregado equivale a casi 4 meses de venta.</strong>
+      En ecom la meta es ≤45 días. El inventario está 2.5x por encima del nivel óptimo —
+      sin acción inmediata, cada semana adicional incrementa el riesgo de obsolescencia y liquidación forzada.
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Cómo se calcula · Validación con el archivo</div>
+      <div style="background:#f8fafc;border-radius:8px;padding:14px;font-family:monospace;font-size:13px;border:1px solid var(--borde);margin-bottom:12px;">
+        <div style="color:#6366f1;font-weight:700;margin-bottom:6px;">Fórmula (alineada al dashboard):</div>
+        <div>Días Inv = Existencia Total <strong>÷</strong> Sugerido Diario 7d</div>
+        <div style="margin-top:6px;color:#64748b;">Ej: 150 pzas ÷ 5 = <strong>30 días</strong></div>
+        <div style="margin-top:6px;color:#64748b;">Ej: 59 pzas ÷ 2.71 = <strong>21.7 días</strong> ✅</div>
+      </div>
+      <div class="nota">
+        ⚠️ El promedio se ve distorsionado por SKUs con sugerido muy bajo (0.001 pzas/día).
+        La cobertura global se calcula como <strong>∑Piezas ÷ ∑Sugerido diario</strong> = 713,661 ÷ 6,269 = <strong>114 días</strong>. El 56.8% del capital está en SKUs individuales con más de 180 días.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Distribución del Capital por Zona</div>
+      <div style="margin-top:4px;">
+        <div class="bar-row">
+          <div class="bar-label">Exceso &gt;180d</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:56.8%;background:#dc2626;">56.8%</div></div>
+          <div class="bar-val">$129.2M</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Crítico 91-180d</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:20.1%;background:#f97316;">20.1%</div></div>
+          <div class="bar-val">$45.7M</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Alto 61-90d</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:10.4%;background:#f59e0b;">10.4%</div></div>
+          <div class="bar-val">$23.6M</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Aceptable 31-60d</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:9.7%;background:#84cc16;">9.7%</div></div>
+          <div class="bar-val">$22.1M</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Óptimo ≤30d</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:3.1%;background:#16a34a;min-width:32px;">3.1%</div></div>
+          <div class="bar-val">$7.0M</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 2 -->
+<section class="slide" id="slide2">
+  <div class="slide-header">
+    <div class="slide-num">Slide 02 / 04</div>
+    <div class="slide-title">🏪 DS vs GDL: GDL con 307 Días de Cobertura Global</div>
+    <div class="slide-sub">
+      DS: cobertura global <strong>97 días</strong> &nbsp;|&nbsp;
+      GDL: cobertura global <strong>307 días</strong>
+    </div>
+  </div>
+
+  <div class="tienda-grid">
+    <div class="tienda-card tc-ds">
+      <div class="tienda-name tn-ds">🏬 DARKSTORE (DS)</div>
+      <div class="tienda-stat"><span class="t-key">Inversión total</span><span class="t-val">$181.7M</span></div>
+      <div class="tienda-stat"><span class="t-key">Piezas en stock</span><span class="t-val">562,485 pzs</span></div>
+      <div class="tienda-stat"><span class="t-key">SKUs únicos</span><span class="t-val">13,472</span></div>
+      <div class="tienda-stat"><span class="t-key">Cobertura global (∑pzas ÷ ∑sug)</span><span class="t-val danger">97 días</span></div>
+      
+      <div class="tienda-stat"><span class="t-key">Inversión exceso &gt;180d</span><span class="t-val danger">$92.3M (50.8%)</span></div>
+      <div class="tienda-stat"><span class="t-key">Recibe transferencia de GDL</span><span class="t-val ok">1,347 SKUs · $3.66M</span></div>
+    </div>
+    <div class="tienda-card tc-gdl">
+      <div class="tienda-name tn-gdl">🏬 DARKSTORE GDL</div>
+      <div class="tienda-stat"><span class="t-key">Inversión total</span><span class="t-val">$45.9M</span></div>
+      <div class="tienda-stat"><span class="t-key">Piezas en stock</span><span class="t-val">151,176 pzs</span></div>
+      <div class="tienda-stat"><span class="t-key">SKUs únicos</span><span class="t-val">12,521</span></div>
+      <div class="tienda-stat"><span class="t-key">Cobertura global (∑pzas ÷ ∑sug)</span><span class="t-val danger">307 días 🚨</span></div>
+      
+      <div class="tienda-stat"><span class="t-key">Inversión exceso &gt;180d</span><span class="t-val danger">$37.0M (80.6%)</span></div>
+      <div class="tienda-stat"><span class="t-key">Envía transferencia a DS</span><span class="t-val ok">1,347 SKUs · $3.66M</span></div>
+    </div>
+  </div>
+
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:16px;">✅</span>
+    <span style="font-size:13px;color:#166534;font-weight:600;">Benchmark ecom: ≤45 días de cobertura &nbsp;|&nbsp; DS está 2.2x por encima &nbsp;|&nbsp; GDL está 6.8x por encima</span>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Cobertura Global vs Benchmark (días)</div>
+      <div style="margin:10px 0 16px;">
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-weight:700;font-size:13px;">🎯 Benchmark Ecom</span>
+            <span style="font-weight:700;color:#16a34a;">45 días ✅</span>
+          </div>
+          <div style="background:#f0fdf4;border-radius:4px;height:20px;">
+            <div style="width:14.7%;background:#16a34a;height:100%;border-radius:4px;"></div>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-weight:700;font-size:13px;">DARKSTORE</span>
+            <span style="font-weight:700;color:#f97316;">97 días 🟠</span>
+          </div>
+          <div style="background:#f1f5f9;border-radius:4px;height:20px;">
+            <div style="width:31.6%;background:#6366f1;height:100%;border-radius:4px;"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+            <span style="font-weight:700;font-size:13px;">DARKSTORE GDL</span>
+            <span style="font-weight:700;color:#dc2626;">307 días 🔴</span>
+          </div>
+          <div style="background:#f1f5f9;border-radius:4px;height:20px;">
+            <div style="width:100%;background:#dc2626;height:100%;border-radius:4px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="nota">⚠️ Cobertura = ∑Piezas tienda ÷ ∑Sugerido diario tienda. GDL muestra cobertura de 307d — prioridad de auditoría en surtido, pricing y visibilidad.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Accionables de Transferencia y Diagnóstico</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <div style="padding:11px 14px;background:#fef2f2;border-radius:8px;border-left:3px solid #dc2626;">
+          <div style="font-weight:700;font-size:13px;color:#dc2626;">🔴 Diagnosticar GDL esta semana</div>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">promedio de ~2,000d por SKU sugiere problema de visibilidad, pricing o demanda real baja. Auditar listados y conversión antes de hacer más transferencias.</div>
+        </div>
+        <div style="padding:11px 14px;background:#fff7ed;border-radius:8px;border-left:3px solid #f97316;">
+          <div style="font-weight:700;font-size:13px;color:#f97316;">🟠 Transferir GDL→DS (15 días)</div>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">1,347 SKUs · $3.66M donde GDL tiene &gt;60d y DS tiene &lt;30d. Ejecutar por lotes esta semana.</div>
+        </div>
+        <div style="padding:11px 14px;background:#fffbeb;border-radius:8px;border-left:3px solid #f59e0b;">
+          <div style="font-weight:700;font-size:13px;color:#a16207;">🟡 Transferir DS→GDL (15 días)</div>
+          <div style="font-size:12px;color:#64748b;margin-top:3px;">199 SKUs · $3.43M donde DS tiene &gt;60d y GDL tiene &lt;30d. Menor volumen — ejecutar primero.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3 -->
+<section class="slide" id="slide3">
+  <div class="slide-header">
+    <div class="slide-num">Slide 03 / 04</div>
+    <div class="slide-title">📦 División y Estatus: Dónde Apostar y Qué Liquidar</div>
+    <div class="slide-sub">Ropa: <strong>67.4% en exceso</strong> — peor ratio que Calzado · Descontinuados: <strong>$26.9M en riesgo de pérdida total</strong> si no se actúa en 30 días</div>
+  </div>
+
+  <div class="grid2-asym">
+    <div class="card">
+      <div class="card-title">División — Inversión Sana vs Exceso &gt;180d</div>
+      <div style="margin-top:6px;">
+        <div style="margin-bottom:13px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-weight:700;font-size:13px;">CALZADO</span>
+            <span style="font-size:12px;color:#dc2626;font-weight:700;">53.8% exceso · $95.7M</span>
+          </div>
+          <div class="bar-stack">
+            <div style="width:46.2%;background:#6366f1;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$82.3M</div>
+            <div style="width:53.8%;background:#dc2626;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$95.7M</div>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:3px;">Total: $178.0M · 7,423 SKUs</div>
+        </div>
+        <div style="margin-bottom:13px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-weight:700;font-size:13px;">ROPA</span>
+            <span style="font-size:12px;color:#dc2626;font-weight:700;">67.4% exceso · $28.5M ⚠️</span>
+          </div>
+          <div class="bar-stack">
+            <div style="width:32.6%;background:#8b5cf6;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$13.9M</div>
+            <div style="width:67.4%;background:#dc2626;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$28.5M</div>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:3px;">Total: $42.4M · 5,804 SKUs</div>
+        </div>
+        <div style="margin-bottom:13px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-weight:700;font-size:13px;">JOYERÍA / ACCESORIOS</span>
+            <span style="font-size:12px;color:#f97316;font-weight:700;">61.3% exceso · $2.5M</span>
+          </div>
+          <div class="bar-stack">
+            <div style="width:38.7%;background:#f59e0b;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$1.6M</div>
+            <div style="width:61.3%;background:#f97316;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$2.5M</div>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:3px;">Total: $4.1M · 1,001 SKUs</div>
+        </div>
+        <div style="margin-bottom:13px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-weight:700;font-size:13px;">CUIDADO PERSONAL</span>
+            <span style="font-size:12px;color:#dc2626;font-weight:700;">76.7% exceso</span>
+          </div>
+          <div class="bar-stack">
+            <div style="width:23.3%;background:#22c55e;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$0.3M</div>
+            <div style="width:76.7%;background:#dc2626;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$1.1M</div>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:3px;">Total: $1.4M · 165 SKUs</div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-weight:700;font-size:13px;">HOME</span>
+            <span style="font-size:12px;color:#dc2626;font-weight:700;">74.6% exceso</span>
+          </div>
+          <div class="bar-stack">
+            <div style="width:25.4%;background:#06b6d4;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$0.3M</div>
+            <div style="width:74.6%;background:#dc2626;display:flex;align-items:center;padding-left:8px;font-size:11px;color:#fff;font-weight:700;">$0.9M</div>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:3px;">Total: $1.2M · 458 SKUs</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      <div class="card">
+        <div class="card-title">Inversión por Estatus</div>
+        <div class="bar-row"><div class="bar-label" style="width:120px;">LÍNEA</div><div class="bar-wrap"><div class="bar-fill" style="width:100%;background:#6366f1;">$145.4M</div></div></div>
+        <div class="bar-row"><div class="bar-label" style="width:120px;">LÍNEA P/INV</div><div class="bar-wrap"><div class="bar-fill" style="width:19.7%;background:#8b5cf6;">$28.7M</div></div></div>
+        <div class="bar-row"><div class="bar-label" style="width:120px;color:#dc2626;">DESCONT. ⚠️</div><div class="bar-wrap"><div class="bar-fill" style="width:15.9%;background:#dc2626;">$23.2M</div></div></div>
+        <div class="bar-row"><div class="bar-label" style="width:120px;">OFERTA</div><div class="bar-wrap"><div class="bar-fill" style="width:14.3%;background:#f59e0b;">$20.9M</div></div></div>
+        <div class="bar-row"><div class="bar-label" style="width:120px;color:#f97316;">POR DESCONT.</div><div class="bar-wrap"><div class="bar-fill" style="width:5.8%;background:#f97316;min-width:36px;">$8.4M</div></div></div>
+        <div class="bar-row"><div class="bar-label" style="width:120px;">OUTLET</div><div class="bar-wrap"><div class="bar-fill" style="width:0.7%;background:#22c55e;min-width:36px;">$1.0M</div></div></div>
+      </div>
+      <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:16px;">
+        <div style="font-weight:700;font-size:13px;color:#dc2626;margin-bottom:8px;">⚠️ $31.7M en Riesgo de Pérdida Total</div>
+        <div style="font-size:12.5px;color:#7f1d1d;line-height:1.6;">Descontinuados + Por Descontinuar = $31.7M. De ese total, <strong>$26.9M ya superan 90 días</strong>. La probabilidad de recuperación cae ~3% por semana sin acción.</div>
+        <div style="margin-top:10px;font-size:12px;color:#7f1d1d;font-weight:600;">Canal recomendado: MeLi · Amazon · Mayoristas a costo +10%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4 -->
+<section class="slide" id="slide4">
+  <div class="slide-header">
+    <div class="slide-num">Slide 04 / 04</div>
+    <div class="slide-title">🎯 Plan de Acción: $87.4M Recuperables en 90 Días</div>
+    <div class="slide-sub">6 iniciativas ordenadas por urgencia e impacto financiero real</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi r">
+      <div class="kpi-label">Capital Total en Juego</div>
+      <div class="kpi-val r">$262.5M</div>
+      <div class="kpi-desc">En las 5 iniciativas prioritarias</div>
+    </div>
+    <div class="kpi g">
+      <div class="kpi-label">Recuperación Estimada</div>
+      <div class="kpi-val g">$87.4M</div>
+      <div class="kpi-desc">En 90 días con ejecución disciplinada</div>
+    </div>
+    <div class="kpi o">
+      <div class="kpi-label">Iniciativas Urgentes</div>
+      <div class="kpi-val o">2</div>
+      <div class="kpi-desc">Plazo 30–60 días · acción inmediata</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">ROI del Plan</div>
+      <div class="kpi-val a">33.3%</div>
+      <div class="kpi-desc">$87.4M recuperados de $262.5M en juego</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-title">Iniciativas Priorizadas por Impacto y Urgencia</div>
+    <table class="acc-table">
+      <thead>
+        <tr>
+          <th>Prioridad</th><th>Iniciativa</th><th>Capital en Juego</th>
+          <th>Recuperación Est.</th><th>Recuperabilidad</th><th>Plazo</th><th>Área</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge r">🔴 URGENTE</span></td>
+          <td><strong>Liquidar descontinuados &gt;90d</strong><br><small style="color:#64748b">MeLi + Amazon + mayoristas a costo +10%</small></td>
+          <td><strong>$26.9M</strong></td>
+          <td><strong style="color:#16a34a">$18.0M</strong></td>
+          <td><div class="prog-wrap"><div class="prog-fill" style="width:67%;background:#16a34a;"></div></div> <small>67%</small></td>
+          <td><strong>30 días</strong></td>
+          <td>Comercial</td>
+        </tr>
+        <tr>
+          <td><span class="badge r">🔴 URGENTE</span></td>
+          <td><strong>Campaña salida SKUs &gt;180d</strong><br><small style="color:#64748b">Descuentos escalonados en todos los canales digitales</small></td>
+          <td><strong>$129.2M</strong></td>
+          <td><strong style="color:#16a34a">$38.7M</strong></td>
+          <td><div class="prog-wrap"><div class="prog-fill" style="width:30%;background:#f97316;"></div></div> <small>30%</small></td>
+          <td><strong>60 días</strong></td>
+          <td>Ecom + Mktg</td>
+        </tr>
+        <tr>
+          <td><span class="badge o">🟠 ALTA</span></td>
+          <td><strong>Transferir GDL→DS (1,347 SKUs)</strong><br><small style="color:#64748b">GDL &gt;60d + DS &lt;30d · reposicionamiento inmediato</small></td>
+          <td><strong>$3.66M</strong></td>
+          <td><strong style="color:#16a34a">$3.66M</strong></td>
+          <td><div class="prog-wrap"><div class="prog-fill" style="width:100%;background:#16a34a;"></div></div> <small>100%</small></td>
+          <td><strong>15 días</strong></td>
+          <td>Operaciones</td>
+        </tr>
+        <tr>
+          <td><span class="badge o">🟠 ALTA</span></td>
+          <td><strong>Auditar compras SKUs A &gt;90d</strong><br><small style="color:#64748b">Revisar OC últimos 6 meses + ajustar parámetros EOQ</small></td>
+          <td><strong>$49.3M</strong></td>
+          <td><strong style="color:#16a34a">$15.0M</strong></td>
+          <td><div class="prog-wrap"><div class="prog-fill" style="width:30%;background:#f97316;"></div></div> <small>30%</small></td>
+          <td><strong>45 días</strong></td>
+          <td>Planeación</td>
+        </tr>
+        <tr>
+          <td><span class="badge y">🟡 MEDIA</span></td>
+          <td><strong>Renegociar PUMA / ADIDAS</strong><br><small style="color:#64748b">Canje o devolución SKUs &gt;180d · $53.6M en juego</small></td>
+          <td><strong>$53.4M</strong></td>
+          <td><strong style="color:#16a34a">$12.0M</strong></td>
+          <td><div class="prog-wrap"><div class="prog-fill" style="width:22%;background:#f59e0b;"></div></div> <small>22%</small></td>
+          <td><strong>90 días</strong></td>
+          <td>Compras</td>
+        </tr>
+        <tr>
+          <td><span class="badge y">🟡 PREVENTIVA</span></td>
+          <td><strong>Ajustar parámetros EOQ + límites de compra</strong><br><small style="color:#64748b">Máx. cobertura 60d · concentración máx. 65% por división</small></td>
+          <td><strong>—</strong></td>
+          <td><strong style="color:#6366f1">Preventivo</strong></td>
+          <td><div class="prog-wrap"><div class="prog-fill" style="width:0%;background:#6366f1;"></div></div> <small>Pendiente</small></td>
+          <td><strong>60 días</strong></td>
+          <td>Planeación</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alerta">
+    <div class="alerta-icon">📌</div>
+    <div class="alerta-text">
+      <strong>Mensaje Ejecutivo:</strong> No es un problema de ventas — es un problema de inventario sobrecomprado y mal posicionado.
+      Con <strong>114 días</strong> de cobertura global (∑piezas ÷ ∑sugerido diario) vs benchmark de 45 días, hay
+      <strong>2.5x más inventario del necesario</strong>. Prioridad inmediata: <strong>liquidar → transferir → frenar compras</strong>.
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Recuperación Estimada por Iniciativa ($M)</div>
+      <div style="margin-top:6px;">
+        <div class="bar-row"><div class="bar-label">Salida &gt;180d</div><div class="bar-wrap"><div class="bar-fill" style="width:100%;background:#dc2626;">$38.7M</div></div></div>
+        <div class="bar-row"><div class="bar-label">Liq. Descont.</div><div class="bar-wrap"><div class="bar-fill" style="width:46.5%;background:#f97316;">$18.0M</div></div></div>
+        <div class="bar-row"><div class="bar-label">Auditar Compras A</div><div class="bar-wrap"><div class="bar-fill" style="width:38.8%;background:#f59e0b;">$15.0M</div></div></div>
+        <div class="bar-row"><div class="bar-label">Renegociar Marcas</div><div class="bar-wrap"><div class="bar-fill" style="width:31%;background:#8b5cf6;">$12.0M</div></div></div>
+        <div class="bar-row"><div class="bar-label">Transferencias</div><div class="bar-wrap"><div class="bar-fill" style="width:9.5%;background:#6366f1;min-width:36px;">$3.7M</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Principios para No Repetirlo</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:18px;">📏</span>
+          <div><div style="font-weight:700;font-size:13px;">Límite de reorden: máx. 60 días</div>
+          <div style="font-size:12px;color:#64748b;">No emitir OC si cobertura actual &gt;60 días (piezas ÷ sugerido diario)</div></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:18px;">📊</span>
+          <div><div style="font-weight:700;font-size:13px;">Concentración máx. 65% por división</div>
+          <div style="font-size:12px;color:#64748b;">Calzado hoy = 78.2% — reducir a 65% en la siguiente temporada</div></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:18px;">⚡</span>
+          <div><div style="font-weight:700;font-size:13px;">Alerta automática a 60 días</div>
+          <div style="font-size:12px;color:#64748b;">Cualquier SKU &gt;60d activa protocolo de descuento y liquidación</div></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="font-size:18px;">🔄</span>
+          <div><div style="font-weight:700;font-size:13px;">Revisión EOQ mensual</div>
+          <div style="font-size:12px;color:#64748b;">Actualizar sugerido diario con datos reales de los últimos 30 días</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  Análisis Estratégico de Inventario Ecom · Corte 6 Abril 2026 · $227.7M · 713,661 pzas · 15,038 SKUs
+  <br><span style="color:#94a3b8;">Fórmula días inventario: Existencia Total ÷ Sugerido Diario 7d (alineada al dashboard)</span>
+</div>
+
+<script>
+function showSlide(n){
+  document.querySelectorAll('.slide').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('slide'+n).classList.add('active');
+  document.querySelectorAll('.nav-tab')[n-1].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
